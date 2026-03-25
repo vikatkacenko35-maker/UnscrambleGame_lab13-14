@@ -66,9 +66,13 @@ fun GameScreen(
             score = gameUiState.score
         )
         Gamelayot(
-            currentScrambledWord = gameUiState.currentScrambledWord,
-            onUserGuessChanged = { },
-            onkeyboardDone = { }
+           currentScrambledWord = gameUiState.currentScrambledWord,
+            userGuess = gameViewModel.userGuess,
+            onUserGuessChanged = {gameViewModel.updateUserGuess(it)},
+            onkeyboardDone = {gameViewModel.checkUserGuess()},
+            isGuessWrong = gameUiState.isGuessedWordWrong,
+            onSubmitClicked = {gameViewModel.checkUserGuess()},
+            onSkepClicked = { gameViewModel.SkipWord() }
         )
     }
 }
@@ -105,8 +109,12 @@ fun GameStatus(
 @Composable
 fun Gamelayot(
     currentScrambledWord: String,
+    userGuess: String,
     onUserGuessChanged:(String) -> Unit,
     onkeyboardDone: () -> Unit,
+    isGuessWrong: Boolean,
+    onSubmitClicked: () -> Unit,
+    onSkepClicked: () -> Unit,
     modifier: Modifier = Modifier
 ){
     var userGuess by remember { mutableStateOf("") }
@@ -148,6 +156,7 @@ fun Gamelayot(
             singleLine = true,
             modifier = Modifier.fillMaxWidth(),
             label = {Text("Введите слово")},
+            isError = isGuessWrong,
             keyboardOptions = KeyboardOptions.Default.copy(
                 imeAction = ImeAction.Done
             ),
@@ -155,12 +164,28 @@ fun Gamelayot(
                 onDone = {onkeyboardDone()}
             )
         )
+        if (isGuessWrong){
+            Text(
+                text = "Неправильно! попробуйте еще раз.",
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodyMedium
+            )
+        }
+        Button(
+            onClick = onSubmitClicked,
+            modifier = Modifier.fillMaxWidth()
+        ){
+            Text(
+                text = "проверить",
+                fontSize = 16.sp
+            )
+        }
         OutlinedButton(
-            onClick = { },
+            onClick = onSkepClicked,
             modifier = Modifier.fillMaxWidth()
         ) {
             Text(
-                text = "проверить",
+                text = "Пропустить",
                 fontSize = 16.sp
             )
         }
